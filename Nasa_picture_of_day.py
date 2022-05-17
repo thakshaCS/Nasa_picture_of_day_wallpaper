@@ -29,15 +29,19 @@ def get_wallpaper() -> str:
     picture_url = PICTURE_URL_BEGINNING + curr_year + curr_month + curr_day \
                   + ".html"
     name = str(today) + '.jpg'
-    request = requests.get(picture_url)
-    soup = BeautifulSoup(request.text, "html.parser")
-    images = soup.find_all('img')
-    for image in images:
-        link = image['src']
-        with open(name, 'wb') as f:
-            image_info = requests.get(IMAGE_INFO_URL + link)
-            f.write(image_info.content)
-    return today
+    try:
+        request = requests.get(picture_url)
+        soup = BeautifulSoup(request.text, "html.parser")
+        images = soup.find_all('img')
+        for image in images:
+            link = image['src']
+            with open(name, 'wb') as f:
+                image_info = requests.get(IMAGE_INFO_URL + link)
+                f.write(image_info.content)
+        return today
+    except requests.exceptions.RequestException as e:
+        return "Default_Wallpaper"
+
 
 
 def set_wallpaper():
@@ -56,7 +60,7 @@ def change_wallpaper():
     """
     Changes the wallpaper every 24 hours by calling set_wallpaper.
     """
-    schedule.every(5).seconds.do(set_wallpaper)
+    schedule.every(24).hours.do(set_wallpaper)
     while True:
         schedule.run_pending()
         time.sleep(1)
